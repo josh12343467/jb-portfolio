@@ -1,56 +1,172 @@
 "use client";
 
-import { motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
-import { useState, type MouseEvent, type ReactNode } from "react";
+import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent, type ReactNode } from "react";
 
-const skillGroups = [
+type SkillAccent = "lime" | "violet" | "cyan" | "orange" | "blue" | "neutral";
+type Skill = { name: string; mark: string; note: string };
+type SkillGroup = {
+  number: string;
+  title: string;
+  eyebrow: string;
+  description: string;
+  symbol: string;
+  accent: SkillAccent;
+  skills: Skill[];
+};
+
+const skillGroups: SkillGroup[] = [
   {
     number: "01",
-    title: "Apps & Interfaces",
-    subtitle: "BUILD FOR THE SCREEN",
-    description: "Tools for shaping useful, responsive digital experiences.",
-    symbol: "✳",
+    title: "Frontend Development",
+    eyebrow: "WEB INTERFACES",
+    description: "Building responsive web experiences and shaping how people interact with them.",
+    symbol: "</>",
     accent: "lime",
     skills: [
-      { name: "Flutter", mark: "Fl", note: "Cross-platform" },
-      { name: "React Native", mark: "RN", note: "Mobile" },
-      { name: "Next.js", mark: "N", note: "Web" },
-      { name: "Tailwind CSS", mark: "Tw", note: "Styling" },
+      { name: "Next.js", mark: "N", note: "Web framework" },
+      { name: "Tailwind CSS", mark: "Tw", note: "Interface styling" },
     ],
   },
   {
     number: "02",
-    title: "Logic & Tooling",
-    subtitle: "MAKE IT WORK",
-    description: "Programming languages and everyday development tools.",
-    symbol: "⌘",
+    title: "Mobile Development",
+    eyebrow: "CROSS-PLATFORM APPS",
+    description: "Creating mobile experiences designed to work across devices and platforms.",
+    symbol: "▣",
     accent: "violet",
     skills: [
-      { name: "C++", mark: "C++", note: "Programming" },
-      { name: "Python", mark: "Py", note: "Programming" },
-      { name: "Git", mark: "Gt", note: "Version control" },
+      { name: "Flutter", mark: "Fl", note: "Cross-platform apps" },
+      { name: "React Native", mark: "RN", note: "Native mobile apps" },
     ],
   },
   {
     number: "03",
-    title: "Platforms & Prototyping",
-    subtitle: "CONNECT IDEAS",
-    description: "Building blocks for connected services and tangible experiments.",
-    symbol: "⌬",
+    title: "Backend & Databases",
+    eyebrow: "DATA & SERVICES",
+    description: "Working with app services and data storage to support useful product features.",
+    symbol: "{ }",
+    accent: "cyan",
+    skills: [
+      { name: "Firebase", mark: "Fb", note: "App platform & services" },
+      { name: "SQLite", mark: "SQL", note: "Local database" },
+    ],
+  },
+  {
+    number: "04",
+    title: "Programming Languages",
+    eyebrow: "CODE & LOGIC",
+    description: "The languages I use to develop application logic and work closer to the system level.",
+    symbol: "λ",
     accent: "orange",
     skills: [
-      { name: "Firebase", mark: "Fb", note: "Platform" },
+      { name: "C++", mark: "C++", note: "Systems & firmware" },
+      { name: "Python", mark: "Py", note: "Programming" },
+    ],
+  },
+  {
+    number: "05",
+    title: "Hardware & IoT",
+    eyebrow: "SOFTWARE MEETS HARDWARE",
+    description: "Connecting software with microcontrollers and physical prototypes.",
+    symbol: "⌬",
+    accent: "blue",
+    skills: [
+      { name: "Arduino", mark: "Ar", note: "Microcontroller platform" },
       { name: "Hardware Prototyping", mark: "HW", note: "Physical systems" },
+    ],
+  },
+  {
+    number: "06",
+    title: "Tools & Workflow",
+    eyebrow: "BUILD WITH INTENTION",
+    description: "Keeping development organized and making changes easier to track.",
+    symbol: "↗",
+    accent: "neutral",
+    skills: [
+      { name: "Git", mark: "Gt", note: "Version control" },
     ],
   },
 ];
 
-const projects = [
+const skillAccents: Record<SkillAccent, { label: string; icon: string; border: string; glow: string; rail: string }> = {
+  lime: {
+    label: "text-[#d5fc69]",
+    icon: "border-[#d5fc69]/20 bg-[#d5fc69]/[0.08] text-[#d5fc69]",
+    border: "group-hover:border-[#d5fc69]/30",
+    glow: "bg-[#d5fc69]/[0.06]",
+    rail: "from-[#d5fc69]/80",
+  },
+  violet: {
+    label: "text-violet-200",
+    icon: "border-violet-200/20 bg-violet-300/[0.08] text-violet-200",
+    border: "group-hover:border-violet-200/30",
+    glow: "bg-violet-400/[0.07]",
+    rail: "from-violet-300/80",
+  },
+  cyan: {
+    label: "text-cyan-200",
+    icon: "border-cyan-200/20 bg-cyan-300/[0.08] text-cyan-200",
+    border: "group-hover:border-cyan-200/30",
+    glow: "bg-cyan-400/[0.07]",
+    rail: "from-cyan-300/80",
+  },
+  orange: {
+    label: "text-orange-200",
+    icon: "border-orange-200/20 bg-orange-300/[0.08] text-orange-200",
+    border: "group-hover:border-orange-200/30",
+    glow: "bg-orange-400/[0.07]",
+    rail: "from-orange-300/80",
+  },
+  blue: {
+    label: "text-sky-200",
+    icon: "border-sky-200/20 bg-sky-300/[0.08] text-sky-200",
+    border: "group-hover:border-sky-200/30",
+    glow: "bg-sky-400/[0.07]",
+    rail: "from-sky-300/80",
+  },
+  neutral: {
+    label: "text-neutral-200",
+    icon: "border-white/15 bg-white/[0.05] text-neutral-200",
+    border: "group-hover:border-white/25",
+    glow: "bg-white/[0.035]",
+    rail: "from-white/60",
+  },
+};
+
+type Project = {
+  number: string;
+  title: string;
+  category: string;
+  desc: string;
+  fullDesc: string;
+  problem: string;
+  approach: string;
+  contributions: string[];
+  features: string[];
+  outcome: string;
+  tags: string[];
+  accent: string;
+  visual: string;
+  video?: string;
+  images?: string[];
+  thumbnail?: string;
+  liveUrl?: string;
+  repositoryUrl?: string;
+};
+
+const projects: Project[] = [
   {
     number: "01",
     title: "Interactive Glass Board",
     category: "HARDWARE · INTERACTION",
     desc: "A custom hardware and software experience for interactive displays, built to move beyond traditional mesh setups.",
+    fullDesc: "This project explores a new way of interacting with displays. By bypassing traditional mesh setups, the Interactive Glass Board offers a more direct, responsive, and tactile interaction model. I handled the C++ firmware development and the UI/UX design for the interface.",
+    problem: "Traditional mesh-based display setups can make direct, tactile interaction harder to achieve.",
+    approach: "Explore a more direct and responsive interaction model by bringing custom hardware and interface design together.",
+    contributions: ["C++ firmware development", "UI/UX design for the interface"],
+    features: ["Interactive display experience", "Hardware and software integration", "Responsive, tactile interaction model"],
+    outcome: "Designed to move beyond traditional mesh setups and offer a more direct, responsive way to interact with a display.",
     tags: ["Hardware", "C++", "UI/UX"],
     accent: "lime",
     visual: "grid",
@@ -60,6 +176,12 @@ const projects = [
     title: "Mobile Money Tracker",
     category: "MOBILE · PRODUCTIVITY",
     desc: "A personal finance app with local notifications that helps make everyday expenses easier to monitor.",
+    fullDesc: "Designed to simplify financial tracking, this application uses a local SQLite database to store daily expenses. It features a clean UI and automated local notifications to remind users to log their budget, built with cross-platform mobile development concepts.",
+    problem: "Everyday spending can be difficult to track consistently without a simple way to record expenses and remember to update them.",
+    approach: "A personal finance app centered on daily expense logging, local data storage, and reminders.",
+    contributions: ["Mobile app experience for expense tracking", "Local data persistence with SQLite", "Reminder flow using local notifications"],
+    features: ["Daily expense logging", "SQLite-based local storage", "Local notifications to encourage regular updates"],
+    outcome: "Designed to make everyday expenses easier to monitor without relying on a remote database for the local expense records.",
     tags: ["Mobile App", "React Native", "Flutter"],
     accent: "violet",
     visual: "orbit",
@@ -68,10 +190,19 @@ const projects = [
     number: "03",
     title: "Smart Home Prototype",
     category: "IOT · CONNECTED SYSTEMS",
-    desc: "An integrated IoT prototype combining custom hardware circuitry with a companion Flutter application.",
-    tags: ["IoT", "Flutter", "C++"],
+    desc: "An IoT smart home system powered by Arduino, featuring a custom mobile app with touch and voice command controls.",
+    fullDesc: "This Smart Home Prototype is an IoT automation system built around Arduino microcontrollers. I developed a companion mobile application that serves as the central hub for monitoring and controlling home appliances. Users can manually operate devices through simple button clicks within the app, or use integrated voice commands for hands-free control. The project bridges custom hardware circuitry with mobile software.",
+    problem: "A connected home needs a clear way to monitor appliances and control them without interacting with each device separately.",
+    approach: "Pair an Arduino-based smart home prototype with a companion mobile app that acts as a central control interface.",
+    contributions: ["Development of the companion mobile application", "Touch/button-based appliance controls", "Voice-command control experience"],
+    features: ["Appliance monitoring and control", "Manual in-app controls", "Hands-free voice commands", "Arduino-based IoT hardware"],
+    outcome: "Brings the hardware prototype and mobile interface together, with both manual and voice-based ways to control appliances.",
+    tags: ["IoT", "Arduino", "Flutter", "Voice Control", "C++"],
     accent: "orange",
     visual: "circuit",
+    video: "/cirvia_vid.mp4",
+    images: ["/cirvia_app.jpg"],
+    thumbnail: "/cirvia_poster.png"
   },
 ];
 
@@ -181,7 +312,302 @@ function ProjectVisual({ visual }: { visual: string }) {
   );
 }
 
-function ProjectCard({ proj, index }: { proj: (typeof projects)[number]; index: number }) {
+// ----------------------------------------------------
+// PROJECT MODAL COMPONENT (POP-UP SA SCREEN)
+// ----------------------------------------------------
+function ProjectModal({ project, onClose }: { project: Project, onClose: () => void }) {
+  const [activeMediaIndex, setActiveMediaIndex] = useState(0);
+  const mediaStageRef = useRef<HTMLDivElement>(null);
+
+  const mediaItems = [
+    ...(project.video ? [{ type: "video" as const, src: project.video, label: "Watch demo" }] : []),
+    ...(project.images ?? []).map((src, index) => ({
+      type: "image" as const,
+      src,
+      label: (project.images?.length ?? 0) > 1 ? `Photo ${String(index + 1).padStart(2, "0")}` : "App screen",
+    })),
+  ];
+  const activeMedia = mediaItems[activeMediaIndex];
+  
+  const accentText = project.accent === "lime" ? "text-[#d5fc69]" : project.accent === "violet" ? "text-violet-300" : "text-orange-300";
+  const accentBorder = project.accent === "lime" ? "border-[#d5fc69]/30" : project.accent === "violet" ? "border-violet-300/30" : "border-orange-300/30";
+  const accentFill = project.accent === "lime" ? "bg-[#d5fc69] text-[#10120b]" : project.accent === "violet" ? "bg-violet-300 text-[#17131d]" : "bg-orange-300 text-[#1b1510]";
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onClose]);
+
+  const closeModal = () => onClose();
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.22 }}
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 p-3 backdrop-blur-xl sm:p-6"
+      onClick={closeModal}
+      role="presentation"
+    >
+      <motion.div
+        initial={{ scale: 0.96, opacity: 0, y: 18, filter: "blur(8px)" }}
+        animate={{ scale: 1, opacity: 1, y: 0, filter: "blur(0px)" }}
+        exit={{ scale: 0.98, opacity: 0, y: 10, filter: "blur(5px)" }}
+        transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+        onClick={(event) => event.stopPropagation()}
+        className="relative flex h-[min(820px,90dvh)] max-h-[90dvh] w-full max-w-6xl flex-col overflow-hidden rounded-[28px] border border-white/[0.12] bg-[#0b0d0b] shadow-[0_32px_120px_rgba(0,0,0,0.65)] sm:rounded-[32px]"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="project-modal-title"
+      >
+        <div className="flex shrink-0 items-center justify-between border-b border-white/[0.08] bg-[#101210]/95 px-4 py-3.5 sm:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${accentBorder} bg-white/[0.025] font-mono text-xs ${accentText}`}>
+              {project.number}
+            </span>
+            <div className="min-w-0">
+              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-neutral-500">Selected work</p>
+              <p className="truncate text-xs text-neutral-300">Project case study <span className="px-1.5 text-neutral-700">/</span> 2026</p>
+            </div>
+          </div>
+          <button
+            onClick={closeModal}
+            aria-label="Close project details"
+            className="group ml-4 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.035] text-neutral-400 transition-all duration-300 hover:rotate-90 hover:border-white/25 hover:bg-white/[0.09] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d5fc69]"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+          </button>
+        </div>
+
+        <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto custom-scrollbar lg:grid-cols-[1.08fr_.92fr] lg:overflow-hidden">
+          <section className="flex min-w-0 flex-col gap-4 border-b border-white/[0.08] bg-[radial-gradient(ellipse_at_top,rgba(213,252,105,0.055),transparent_58%)] p-4 sm:p-6 lg:min-h-0 lg:border-b-0 lg:border-r lg:border-white/[0.08]">
+            <div className="flex shrink-0 items-center justify-between gap-3">
+              <div>
+                <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-neutral-500">Project media</p>
+                <p className="mt-1 text-sm font-medium text-neutral-200">A closer look</p>
+              </div>
+              <span className="rounded-full border border-white/[0.09] bg-black/20 px-3 py-1.5 font-mono text-[10px] text-neutral-400">
+                {mediaItems.length ? `${String(activeMediaIndex + 1).padStart(2, "0")} / ${String(mediaItems.length).padStart(2, "0")}` : "PREVIEW"}
+              </span>
+            </div>
+
+            <div ref={mediaStageRef} id="project-media-stage" className="relative flex aspect-video w-full shrink-0 items-center justify-center overflow-hidden rounded-[22px] border border-white/[0.1] bg-[#070807] shadow-inner sm:aspect-[4/3] lg:aspect-auto lg:min-h-[260px] lg:flex-1">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.035),transparent_68%)]" />
+              {activeMedia ? (
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={`${project.number}-${activeMediaIndex}`}
+                    initial={{ opacity: 0, scale: 0.985, y: 7 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.99, y: -4 }}
+                    transition={{ duration: 0.22, ease: "easeOut" }}
+                    className="absolute inset-0 flex h-full w-full items-center justify-center p-2 sm:p-3"
+                  >
+                    {activeMedia.type === "video" ? (
+                      <video
+                        key={activeMedia.src}
+                        src={activeMedia.src}
+                        autoPlay
+                        loop
+                        muted
+                        controls
+                        playsInline
+                        className="h-full w-full rounded-xl object-contain"
+                        onError={(event) => { event.currentTarget.style.display = "none"; }}
+                      />
+                    ) : (
+                      <img
+                        src={activeMedia.src}
+                        alt={`${project.title} — ${activeMedia.label}`}
+                        className="h-full w-full rounded-xl object-contain"
+                        onError={(event) => { event.currentTarget.style.opacity = "0"; }}
+                      />
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              ) : (
+                <div className="absolute inset-0 p-2 sm:p-3">
+                  <ProjectVisual visual={project.visual} />
+                </div>
+              )}
+              <span className="pointer-events-none absolute bottom-3 left-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/55 px-3 py-1.5 text-[9px] font-medium uppercase tracking-[0.16em] text-white/75 backdrop-blur-md">
+                <span className={`h-1.5 w-1.5 rounded-full ${accentFill.split(" ")[0]}`} />
+                {activeMedia?.type === "video" ? "Video demonstration" : activeMedia?.type === "image" ? "Project screenshot" : "Concept preview"}
+              </span>
+            </div>
+
+            {mediaItems.length > 1 ? (
+              <div className="flex shrink-0 flex-wrap gap-2" aria-label="Choose project media">
+                {mediaItems.map((item, index) => (
+                  <button
+                    key={`${item.type}-${item.src}`}
+                    type="button"
+                    onClick={() => setActiveMediaIndex(index)}
+                    aria-pressed={activeMediaIndex === index}
+                    className={`group flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-left transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d5fc69] ${activeMediaIndex === index ? `${accentBorder} bg-white/[0.07]` : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.18] hover:bg-white/[0.045]"}`}
+                  >
+                    <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${activeMediaIndex === index ? accentFill : "bg-white/[0.06] text-neutral-400"}`}>
+                      {item.type === "video" ? (
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true"><path d="m9 6 10 6-10 6V6Z" fill="currentColor" /></svg>
+                      ) : (
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" stroke="currentColor" strokeWidth="1.5" /><circle cx="9" cy="10" r="1.5" fill="currentColor" /><path d="m5 17 5-4 3 2 3-3 3 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                      )}
+                    </span>
+                    <span>
+                      <span className="block text-[11px] font-medium text-neutral-200">{item.label}</span>
+                      <span className="mt-0.5 block text-[9px] text-neutral-500">{item.type === "video" ? "MP4 · Demo" : "Image · Preview"}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="shrink-0 text-[10px] leading-5 text-neutral-600">Designed, built, and documented with care.</p>
+            )}
+          </section>
+
+          <section className="min-w-0 p-5 sm:p-7 lg:min-h-0 lg:overflow-y-auto lg:p-8 custom-scrollbar">
+            <p className={`mb-3 text-[9px] font-semibold uppercase tracking-[0.2em] ${accentText}`}>{project.category}</p>
+            <h3 id="project-modal-title" className="text-[clamp(1.65rem,3vw,2.65rem)] font-semibold leading-[1.03] tracking-[-0.055em] text-white">
+              {project.title}<span className={accentText}>.</span>
+            </h3>
+            <p className="mt-4 text-sm leading-6 text-neutral-400">{project.desc}</p>
+
+            <div className="my-6 h-px bg-gradient-to-r from-white/15 via-white/[0.07] to-transparent" />
+
+            <div className="mb-7">
+              <div className="mb-3 flex items-center gap-2">
+                <span className={`h-5 w-1 rounded-full ${accentFill.split(" ")[0]}`} />
+                <h4 className="text-xs font-semibold uppercase tracking-[0.16em] text-white">About the project</h4>
+              </div>
+              <p className="text-[13px] leading-[1.9] text-neutral-400 sm:text-sm">{project.fullDesc}</p>
+            </div>
+
+            <div className="mb-7 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-4">
+                <p className={`mb-2 text-[9px] font-semibold uppercase tracking-[0.18em] ${accentText}`}>01 / The problem</p>
+                <p className="text-xs leading-6 text-neutral-400">{project.problem}</p>
+              </div>
+              <div className="rounded-2xl border border-white/[0.08] bg-white/[0.025] p-4">
+                <p className={`mb-2 text-[9px] font-semibold uppercase tracking-[0.18em] ${accentText}`}>02 / The approach</p>
+                <p className="text-xs leading-6 text-neutral-400">{project.approach}</p>
+              </div>
+            </div>
+
+            <div className="mb-7">
+              <div className="mb-3 flex items-center gap-2">
+                <span className={`h-5 w-1 rounded-full ${accentFill.split(" ")[0]}`} />
+                <h4 className="text-xs font-semibold uppercase tracking-[0.16em] text-white">My contributions</h4>
+              </div>
+              <ul className="grid gap-2">
+                {project.contributions.map((item) => (
+                  <li key={item} className="flex items-start gap-2.5 text-xs leading-6 text-neutral-400">
+                    <span className={`mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${accentFill.split(" ")[0]}`} />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="mb-7">
+              <div className="mb-3 flex items-center gap-2">
+                <span className={`h-5 w-1 rounded-full ${accentFill.split(" ")[0]}`} />
+                <h4 className="text-xs font-semibold uppercase tracking-[0.16em] text-white">Key features</h4>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {project.features.map((feature) => (
+                  <span key={feature} className="rounded-xl border border-white/[0.08] bg-black/20 px-3 py-2 text-[11px] leading-5 text-neutral-300">{feature}</span>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-7 rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.04] to-transparent p-4">
+              <p className={`mb-2 text-[9px] font-semibold uppercase tracking-[0.18em] ${accentText}`}>Project outcome / focus</p>
+              <p className="text-xs leading-6 text-neutral-300">{project.outcome}</p>
+            </div>
+
+            <div className="mb-7">
+              <div className="mb-3 flex items-center gap-2">
+                <span className={`h-5 w-1 rounded-full ${accentFill.split(" ")[0]}`} />
+                <h4 className="text-xs font-semibold uppercase tracking-[0.16em] text-white">Explore the project</h4>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {project.video && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const demoIndex = mediaItems.findIndex((item) => item.type === "video");
+                      if (demoIndex >= 0) {
+                        setActiveMediaIndex(demoIndex);
+                        mediaStageRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }
+                    }}
+                    className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-semibold transition-transform duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d5fc69] ${accentFill}`}
+                  >
+                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" aria-hidden="true"><path d="m9 6 10 6-10 6V6Z" fill="currentColor" /></svg>
+                    Watch demo
+                  </button>
+                )}
+                {project.liveUrl && (
+                  <a href={project.liveUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.035] px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.08]">
+                    Live demo <ArrowUpRight />
+                  </a>
+                )}
+                {project.repositoryUrl && (
+                  <a href={project.repositoryUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.035] px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.08]">
+                    Source code <ArrowUpRight />
+                  </a>
+                )}
+              </div>
+              {!project.liveUrl && !project.repositoryUrl && (
+                <p className="mt-3 text-[10px] leading-5 text-neutral-600">Project-specific public links can be added when the live demo or repository is ready.</p>
+              )}
+            </div>
+
+            <div className="mb-7">
+              <div className="mb-3 flex items-center gap-2">
+                <span className={`h-5 w-1 rounded-full ${accentFill.split(" ")[0]}`} />
+                <h4 className="text-xs font-semibold uppercase tracking-[0.16em] text-white">Built with</h4>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {project.tags.map((tag) => (
+                  <span key={tag} className={`rounded-full border border-white/[0.09] bg-white/[0.025] px-3 py-2 text-[11px] text-neutral-300 transition-colors hover:border-white/20 ${tag === project.tags[0] ? accentText : ""}`}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.025] px-4 py-3.5">
+              <div>
+                <p className="text-[9px] uppercase tracking-[0.18em] text-neutral-500">Portfolio / Case study</p>
+                <p className="mt-1 text-xs text-neutral-300">Project {project.number} of {String(projects.length).padStart(2, "0")}</p>
+              </div>
+              <span className={`flex h-9 w-9 items-center justify-center rounded-full ${accentFill}`}>
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </span>
+            </div>
+          </section>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// ----------------------------------------------------
+// PROJECT CARD
+// ----------------------------------------------------
+function ProjectCard({ proj, index, onClick }: { proj: Project; index: number; onClick: () => void }) {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   const handleMouseMove = (event: MouseEvent<HTMLElement>) => {
@@ -196,16 +622,37 @@ function ProjectCard({ proj, index }: { proj: (typeof projects)[number]; index: 
       transition={{ duration: 0.55, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
       viewport={{ once: true, amount: 0.15 }}
       onMouseMove={handleMouseMove}
+      onClick={onClick}
+      onKeyDown={(event: ReactKeyboardEvent<HTMLElement>) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+      aria-label={`Open ${proj.title} case study`}
       whileHover={{ y: -7 }}
-      className="group relative flex h-full flex-col overflow-hidden rounded-[26px] border border-white/[0.09] bg-[#111311] p-4 transition-colors duration-300 hover:border-[#d5fc69]/30 sm:p-5"
+      className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-[26px] border border-white/[0.09] bg-[#111311] p-4 transition-colors duration-300 hover:border-[#d5fc69]/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d5fc69] sm:p-5"
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
         style={{ background: `radial-gradient(420px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(213,252,105,0.075), transparent 45%)` }}
       />
-      <div className="relative mb-5">
-        <ProjectVisual visual={proj.visual} />
-        <span className="absolute right-3 top-3 rounded-full border border-white/10 bg-black/45 px-3 py-1 font-mono text-[10px] text-white/60 backdrop-blur">{proj.number} / 03</span>
+      <div className="relative mb-5 h-48 w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-[#121710]">
+        {proj.thumbnail ? (
+          <img 
+            src={proj.thumbnail} 
+            alt={proj.title} 
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" 
+            onError={(e) => { e.currentTarget.style.display = "none"; }} 
+          />
+        ) : (
+          <ProjectVisual visual={proj.visual} />
+        )}
+        <span className="absolute right-3 top-3 rounded-full border border-white/10 bg-black/60 px-3 py-1 font-mono text-[10px] text-white/90 backdrop-blur">
+          {proj.number} / 03
+        </span>
       </div>
       <div className="relative flex flex-1 flex-col px-2 pb-3">
         <p className="mb-3 text-[9px] font-semibold tracking-[0.2em] text-[#d5fc69]/75">{proj.category}</p>
@@ -213,7 +660,7 @@ function ProjectCard({ proj, index }: { proj: (typeof projects)[number]; index: 
           <h3 className="text-xl font-semibold tracking-tight text-white transition-colors duration-300 group-hover:text-[#d5fc69] sm:text-2xl">{proj.title}</h3>
           <span className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 text-neutral-400 transition-all duration-300 group-hover:border-[#d5fc69]/40 group-hover:bg-[#d5fc69] group-hover:text-[#10120b]"><ArrowUpRight /></span>
         </div>
-        <p className="mb-6 flex-1 text-sm leading-7 text-neutral-400">{proj.desc}</p>
+        <p className="mb-6 flex-1 text-sm leading-7 text-neutral-400 line-clamp-2">{proj.desc}</p>
         <div className="flex flex-wrap gap-2">
           {proj.tags.map((tag) => <span key={tag} className="rounded-full border border-white/[0.09] bg-white/[0.025] px-3 py-1.5 text-[11px] text-neutral-300">{tag}</span>)}
         </div>
@@ -222,11 +669,14 @@ function ProjectCard({ proj, index }: { proj: (typeof projects)[number]; index: 
   );
 }
 
+// ----------------------------------------------------
+// MAIN HOME PAGE
+// ----------------------------------------------------
 export default function Home() {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
   const [menuOpen, setMenuOpen] = useState(false);
-  const prefersReducedMotion = useReducedMotion();
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const scrollTo = (id: string) => {
     const element = document.getElementById(id);
@@ -245,9 +695,18 @@ export default function Home() {
         .portfolio-shell::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background-image: linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px); background-size: 74px 74px; mask-image: linear-gradient(to bottom, black, transparent 78%); }
         .hero-orb { animation: drift 13s ease-in-out infinite alternate; }
         .project-grid-visual { isolation: isolate; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
         @keyframes drift { from { transform: translate3d(0,-8px,0) scale(1); } to { transform: translate3d(14px,14px,0) scale(1.06); } }
-        @media (prefers-reduced-motion: reduce) { .portfolio-shell *, .portfolio-shell *::before, .portfolio-shell *::after { scroll-behavior: auto !important; } }
       `}</style>
+
+      <AnimatePresence>
+        {selectedProject && (
+          <ProjectModal project={selectedProject} onClose={() => setSelectedProject(null)} />
+        )}
+      </AnimatePresence>
 
       <motion.div className="fixed left-0 right-0 top-0 z-[100] h-[3px] origin-left bg-[#d5fc69]" style={{ scaleX }} />
 
@@ -311,14 +770,17 @@ export default function Home() {
               <motion.button onClick={() => scrollTo("contact")} whileHover={{ y: -3 }} whileTap={{ scale: 0.97 }} className="inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/[0.025] px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.06]">
                 Let's talk <span className="text-neutral-400">↗</span>
               </motion.button>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.3 }} className="mt-12 flex flex-wrap items-center gap-x-5 gap-y-3 text-xs text-neutral-500">
-              <span className="uppercase tracking-[0.18em]">Currently exploring</span>
-              <span className="h-px w-7 bg-neutral-700" />
-              <span className="text-neutral-300">Mobile development</span>
-              <span className="text-neutral-700">/</span>
-              <span className="text-neutral-300">IoT & hardware</span>
+              <motion.a
+                href="https://mail.google.com/mail/?view=cm&fs=1&to=joshbuiza2@gmail.com&su=Resume%20Request"
+                target="_blank"
+                rel="noreferrer"
+                whileHover={{ y: -3 }}
+                whileTap={{ scale: 0.97 }}
+                aria-label="Request a copy of my resume by email"
+                className="inline-flex items-center gap-3 rounded-full border border-[#d5fc69]/20 bg-[#d5fc69]/[0.045] px-5 py-3.5 text-sm font-semibold text-[#d5fc69] transition-colors hover:border-[#d5fc69]/40 hover:bg-[#d5fc69]/[0.09]"
+              >
+                Request CV <ArrowUpRight />
+              </motion.a>
             </motion.div>
           </div>
 
@@ -329,17 +791,12 @@ export default function Home() {
               <div className="relative min-h-[390px] overflow-hidden rounded-[22px] bg-[#20251b] sm:min-h-[475px]">
                 <div className="absolute inset-0 opacity-50" style={{ backgroundImage: "linear-gradient(rgba(213,252,105,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(213,252,105,.08) 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
                 <div className="absolute inset-0 bg-gradient-to-br from-[#d5fc69]/[0.14] via-transparent to-violet-500/[0.10]" />
-                <div className="absolute -right-16 -top-10 h-52 w-52 rounded-full border border-[#d5fc69]/20" />
-                <div className="absolute -right-7 top-8 h-36 w-36 rounded-full border border-[#d5fc69]/15" />
-                <div className="absolute bottom-[-18%] left-[-14%] h-64 w-64 rounded-full bg-[#d5fc69]/10 blur-[70px]" />
                 <div className="absolute inset-0 flex items-center justify-center p-8">
                   <div className="relative flex h-48 w-48 items-center justify-center rounded-[48px] border border-[#d5fc69]/35 bg-black/20 shadow-[0_0_100px_rgba(213,252,105,0.08)] backdrop-blur-sm sm:h-56 sm:w-56">
                     <div className="absolute inset-0 overflow-hidden rounded-[48px]">
                       <span className="flex h-full w-full items-center justify-center font-mono text-7xl font-black tracking-[-0.12em] text-[#d5fc69] sm:text-8xl">JB</span>
                       <img src="/profile.jpg" alt="Joshua Buiza" className="absolute inset-0 h-full w-full object-cover" onError={(event) => { event.currentTarget.style.display = "none"; }} />
                     </div>
-                    <span className="absolute -right-3 top-8 h-5 w-5 rounded-full border-4 border-[#20251b] bg-[#d5fc69]" />
-                    <span className="absolute -bottom-2 left-8 h-3 w-3 rounded-full bg-violet-300" />
                   </div>
                 </div>
                 <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between rounded-2xl border border-white/10 bg-[#0b0d0b]/70 p-4 backdrop-blur-xl sm:bottom-5 sm:left-5 sm:right-5 sm:p-5">
@@ -351,17 +808,8 @@ export default function Home() {
                 </div>
               </div>
             </motion.div>
-            <motion.div animate={{ y: [0, 5, 0], rotate: [0, 1.5, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="absolute -left-5 top-16 hidden rounded-2xl border border-white/10 bg-[#151815]/90 px-4 py-3 shadow-xl backdrop-blur-xl sm:block">
-              <span className="block font-mono text-[10px] text-neutral-500">BUILD / 001</span><span className="mt-1 block text-sm font-medium text-white">Code meets hardware</span>
-            </motion.div>
-            <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }} className="absolute -bottom-5 right-2 rounded-2xl border border-[#d5fc69]/20 bg-[#151815]/95 px-4 py-3 shadow-xl backdrop-blur-xl sm:right-[-18px]">
-              <span className="block font-mono text-[10px] text-[#d5fc69]/70">FOCUS AREAS</span><span className="mt-1 block text-sm font-medium text-white">Apps · IoT · UI/UX</span>
-            </motion.div>
           </motion.div>
         </div>
-        <button onClick={() => scrollTo("about")} className="absolute bottom-7 left-1/2 hidden -translate-x-1/2 items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-neutral-600 transition-colors hover:text-[#d5fc69] md:flex">
-          <span className="flex h-8 w-5 items-start justify-center rounded-full border border-neutral-700 p-1"><motion.span animate={{ y: [0, 8, 0] }} transition={{ duration: 1.6, repeat: Infinity }} className="h-1.5 w-1 rounded-full bg-[#d5fc69]" /></span> Scroll to explore
-        </button>
       </section>
 
       <div className="mx-auto max-w-6xl px-5 sm:px-8"><div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" /></div>
@@ -379,102 +827,102 @@ export default function Home() {
 
       <div className="mx-auto max-w-6xl px-5 sm:px-8"><div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" /></div>
 
-      <SectionWrapper id="skills" className="py-20 md:py-24">
-        <div className="mb-10 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-          <div>
-            <SectionLabel number="02">Tools of the trade</SectionLabel>
-            <h2 className="text-4xl font-semibold tracking-[-0.055em] sm:text-5xl">My tech <span className="text-neutral-500">stack.</span></h2>
+      <SectionWrapper id="skills" className="py-20 md:py-28">
+        <div className="mb-10 flex flex-col justify-between gap-6 lg:mb-12 lg:flex-row lg:items-end">
+          <div className="max-w-2xl">
+            <SectionLabel number="02">What I work with</SectionLabel>
+            <h2 className="text-4xl font-semibold tracking-[-0.06em] sm:text-5xl lg:text-6xl">
+              My tech <span className="text-[#d5fc69]">stack.</span>
+            </h2>
+            <p className="mt-5 max-w-xl text-sm leading-7 text-neutral-400 sm:text-base">
+              Organized by what each tool helps me build — from web and mobile interfaces to data, code, and connected hardware.
+            </p>
           </div>
-          <p className="max-w-xs text-sm leading-7 text-neutral-500">A growing toolkit for building across screens, software, and the physical world.</p>
+          <div className="flex flex-wrap items-center gap-2 self-start rounded-2xl border border-white/[0.09] bg-white/[0.025] p-2 lg:self-auto">
+            <div className="rounded-xl bg-white/[0.045] px-3 py-2.5">
+              <span className="block font-mono text-lg font-semibold tracking-tight text-white">06</span>
+              <span className="text-[9px] uppercase tracking-[0.18em] text-neutral-500">Disciplines</span>
+            </div>
+            <div className="px-3 py-2.5">
+              <span className="block font-mono text-lg font-semibold tracking-tight text-white">11</span>
+              <span className="text-[9px] uppercase tracking-[0.18em] text-neutral-500">Technologies</span>
+            </div>
+          </div>
         </div>
 
-        <div className="mb-6 flex flex-wrap items-center gap-2 text-[10px] font-medium uppercase tracking-[0.18em] text-neutral-500">
-          <span className="mr-1 inline-flex h-2 w-2 rounded-full bg-[#d5fc69] shadow-[0_0_14px_rgba(213,252,105,.65)]" />
-          <span>9 technologies</span><span className="text-neutral-700">/</span><span>3 focus areas</span>
-        </div>
+        <div className="grid items-stretch gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {skillGroups.map((group, groupIndex) => {
+            const accent = skillAccents[group.accent];
+            return (
+              <motion.article
+                key={group.number}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.16 }}
+                transition={{ duration: 0.55, delay: groupIndex * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ y: -6 }}
+                className={`group relative flex h-full min-h-[290px] flex-col overflow-hidden rounded-[26px] border border-white/[0.09] bg-[#101210] p-5 transition-colors duration-300 sm:p-6 ${accent.border}`}
+              >
+                <div className={`pointer-events-none absolute -right-14 -top-16 h-44 w-44 rounded-full blur-[70px] transition-opacity duration-500 group-hover:opacity-100 ${accent.glow} opacity-60`} />
+                <div className={`absolute inset-x-6 top-0 h-px bg-gradient-to-r ${accent.rail} to-transparent opacity-70`} />
 
-        <div className="grid items-stretch gap-4 lg:grid-cols-3">
-          {skillGroups.map((group, groupIndex) => (
-            <motion.article
-              key={group.number}
-              initial={{ opacity: 0, y: 28, rotateX: -3 }}
-              whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-              viewport={{ once: true, amount: 0.18 }}
-              transition={{ duration: 0.65, delay: groupIndex * 0.12, ease: [0.22, 1, 0.36, 1] }}
-              whileHover={{ y: -7 }}
-              className="group relative flex h-full flex-col overflow-hidden rounded-[28px] border border-white/[0.09] bg-[#111411] p-5 transition-colors duration-500 hover:border-white/[0.17] sm:p-6"
-            >
-              <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-70 transition-opacity duration-500 group-hover:opacity-100" style={{ background: group.accent === "lime" ? "radial-gradient(circle at 100% 0%, rgba(213,252,105,.10), transparent 42%)" : group.accent === "violet" ? "radial-gradient(circle at 100% 0%, rgba(196,181,253,.11), transparent 42%)" : "radial-gradient(circle at 100% 0%, rgba(253,186,116,.11), transparent 42%)" }} />
-              <div className="relative mb-8 flex items-start justify-between gap-4">
-                <div>
-                  <p className={`mb-3 font-mono text-[10px] tracking-[0.2em] ${group.accent === "lime" ? "text-[#d5fc69]/75" : group.accent === "violet" ? "text-violet-200/75" : "text-orange-200/75"}`}>/ {group.number} — {group.subtitle}</p>
-                  <h3 className="max-w-[15rem] text-2xl font-semibold leading-tight tracking-[-0.045em] text-white">{group.title}</h3>
+                <div className="relative mb-7 flex items-start justify-between gap-4">
+                  <span className={`flex h-12 w-12 items-center justify-center rounded-2xl border font-mono text-sm font-semibold tracking-tight transition-transform duration-300 group-hover:scale-105 group-hover:rotate-[-3deg] ${accent.icon}`}>
+                    {group.symbol}
+                  </span>
+                  <span className="font-mono text-xs tracking-[0.16em] text-neutral-600">/{group.number}</span>
                 </div>
-                <motion.div
-                  animate={prefersReducedMotion ? { rotate: 0, y: 0 } : { rotate: [0, 8, -6, 0], y: [0, -3, 0] }}
-                  transition={{ duration: 7 + groupIndex, repeat: prefersReducedMotion ? 0 : Infinity, ease: "easeInOut" }}
-                  className={`relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border text-xl ${group.accent === "lime" ? "border-[#d5fc69]/25 bg-[#d5fc69]/[0.08] text-[#d5fc69]" : group.accent === "violet" ? "border-violet-200/20 bg-violet-300/[0.08] text-violet-200" : "border-orange-200/20 bg-orange-300/[0.08] text-orange-200"}`}
-                >
-                  <span>{group.symbol}</span>
-                  <motion.span animate={prefersReducedMotion ? { scale: 1, opacity: 0.85 } : { scale: [1, 1.35, 1], opacity: [0.6, 1, 0.6] }} transition={{ duration: 2.8 + groupIndex, repeat: prefersReducedMotion ? 0 : Infinity, ease: "easeInOut" }} className={`absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full ${group.accent === "lime" ? "bg-[#d5fc69]" : group.accent === "violet" ? "bg-violet-200" : "bg-orange-200"}`} />
-                </motion.div>
-              </div>
 
-              <p className="relative mb-6 max-w-[18rem] text-sm leading-6 text-neutral-500">{group.description}</p>
+                <div className="relative">
+                  <p className={`mb-2 text-[9px] font-semibold tracking-[0.2em] ${accent.label}`}>{group.eyebrow}</p>
+                  <h3 className="text-xl font-semibold leading-tight tracking-[-0.04em] text-white sm:text-[22px]">{group.title}</h3>
+                  <p className="mt-3 min-h-[60px] text-sm leading-6 text-neutral-500">{group.description}</p>
+                </div>
 
-              <div className="relative mt-auto grid gap-2.5">
-                {group.skills.map((skill, skillIndex) => (
-                  <motion.div
-                    key={skill.name}
-                    initial={{ opacity: 0, x: -12 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true, amount: 0.25 }}
-                    transition={{ duration: 0.4, delay: groupIndex * 0.1 + skillIndex * 0.07 }}
-                    whileHover={{ x: 4, scale: 1.015 }}
-                    className="group/skill relative flex items-center gap-3 overflow-hidden rounded-2xl border border-white/[0.07] bg-black/20 px-3 py-3 transition-colors duration-300 hover:border-white/[0.14] hover:bg-white/[0.035]"
-                  >
-                    <span className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border font-mono text-xs font-bold tracking-tight transition-transform duration-300 group-hover/skill:scale-105 ${group.accent === "lime" ? "border-[#d5fc69]/15 bg-[#d5fc69]/[0.07] text-[#d5fc69]" : group.accent === "violet" ? "border-violet-200/15 bg-violet-300/[0.07] text-violet-200" : "border-orange-200/15 bg-orange-300/[0.07] text-orange-200"}`}>{skill.mark}</span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-medium text-neutral-200 transition-colors group-hover/skill:text-white">{skill.name}</span>
-                      <span className="mt-0.5 block text-[10px] tracking-wide text-neutral-600">{skill.note}</span>
-                    </span>
-                    <span className="translate-x-[-3px] text-sm text-neutral-500 opacity-0 transition-all duration-300 group-hover/skill:translate-x-0 group-hover/skill:opacity-100 group-hover/skill:text-[#d5fc69]">↗</span>
-                  </motion.div>
-                ))}
-              </div>
-
-              <div className="relative mt-6 flex items-center justify-between border-t border-white/[0.07] pt-4">
-                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-neutral-600">Focus area</span>
-                <span className={`rounded-full px-2.5 py-1 font-mono text-[10px] ${group.accent === "lime" ? "bg-[#d5fc69]/[0.08] text-[#d5fc69]/80" : group.accent === "violet" ? "bg-violet-300/[0.08] text-violet-200/80" : "bg-orange-300/[0.08] text-orange-200/80"}`}>{String(group.skills.length).padStart(2, "0")} TOOLS</span>
-              </div>
-            </motion.article>
-          ))}
-        </div>
-
-        <div className="relative mt-5 overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.02] py-3.5">
-          <motion.div animate={prefersReducedMotion ? { x: 0 } : { x: [0, -280] }} transition={{ duration: 22, repeat: prefersReducedMotion ? 0 : Infinity, ease: "linear" }} className="flex w-max items-center gap-4 whitespace-nowrap px-4 text-[10px] font-medium uppercase tracking-[0.22em] text-neutral-600">
-            {Array.from({ length: 6 }, (_, index) => <span key={index} className="flex items-center gap-4"><span>Build with purpose</span><span className="text-[#d5fc69]/70">✳</span><span>Stay curious</span><span className="text-violet-200/70">✳</span><span>Connect ideas</span><span className="text-orange-200/70">✳</span></span>)}
-          </motion.div>
+                <div className="relative mt-6 grid gap-2.5">
+                  {group.skills.map((skill, skillIndex) => (
+                    <motion.div
+                      key={skill.name}
+                      initial={{ opacity: 0, x: -8 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, amount: 0.25 }}
+                      transition={{ duration: 0.35, delay: groupIndex * 0.06 + skillIndex * 0.06 }}
+                      className="flex items-center gap-3 rounded-2xl border border-white/[0.065] bg-black/20 px-3 py-3 transition-all duration-300 hover:border-white/[0.14] hover:bg-white/[0.035]"
+                    >
+                      <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border font-mono text-[11px] font-bold tracking-tight ${accent.icon}`}>
+                        {skill.mark}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-medium text-neutral-200">{skill.name}</span>
+                        <span className="mt-0.5 block text-[11px] text-neutral-500">{skill.note}</span>
+                      </span>
+                      <span className="text-lg text-neutral-700 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-neutral-400" aria-hidden="true">↗</span>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.article>
+            );
+          })}
         </div>
       </SectionWrapper>
-
       <div className="mx-auto max-w-6xl px-5 sm:px-8"><div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" /></div>
 
       <SectionWrapper id="projects">
-        <div className="mb-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><SectionLabel number="03">Selected work</SectionLabel><h2 className="text-4xl font-semibold tracking-[-0.055em] sm:text-5xl">Things I’ve <span className="text-[#d5fc69]">built.</span></h2></div><p className="max-w-xs text-sm leading-7 text-neutral-500">A mix of mobile experiences, interaction experiments, and connected prototypes.</p></div>
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">{projects.map((proj, index) => <ProjectCard key={proj.number} proj={proj} index={index} />)}</div>
-        <p className="mt-5 text-xs text-neutral-600">Project descriptions reflect current portfolio summaries.</p>
+        <div className="mb-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-end"><div><SectionLabel number="03">Selected work</SectionLabel><h2 className="text-4xl font-semibold tracking-[-0.055em] sm:text-5xl">Things I’ve <span className="text-[#d5fc69]">built.</span></h2></div><p className="max-w-xs text-sm leading-7 text-neutral-500">Click on any project to view demonstrations and details.</p></div>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {projects.map((proj, index) => <ProjectCard key={proj.number} proj={proj} index={index} onClick={() => setSelectedProject(proj)} />)}
+        </div>
       </SectionWrapper>
 
       <div className="mx-auto max-w-6xl px-5 sm:px-8"><div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" /></div>
 
       <SectionWrapper id="achievements">
         <div className="grid gap-10 md:grid-cols-[.7fr_1.3fr] md:gap-20">
-          <div><SectionLabel number="04">Milestones</SectionLabel><h2 className="text-4xl font-semibold leading-[1.05] tracking-[-0.055em] sm:text-5xl">Small steps.<br /><span className="text-neutral-500">Real progress.</span></h2><p className="mt-5 max-w-xs text-sm leading-7 text-neutral-500">A few points along my learning and research journey.</p></div>
+          <div><SectionLabel number="04">Milestones</SectionLabel><h2 className="text-4xl font-semibold leading-[1.05] tracking-[-0.055em] sm:text-5xl">Small steps.<br /><span className="text-neutral-500">Real progress.</span></h2></div>
           <div className="relative space-y-4 before:absolute before:bottom-8 before:left-[7px] before:top-8 before:w-px before:bg-white/10">
             {achievements.map((item, index) => <motion.article key={item.title} initial={{ opacity: 0, x: 18 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.12 }} className="relative pl-8">
               <span className="absolute left-0 top-7 h-[15px] w-[15px] rounded-full border-[4px] border-[#0b0d0b] bg-[#d5fc69] shadow-[0_0_0_1px_rgba(213,252,105,.28)]" />
-              <div className="rounded-2xl border border-white/[0.08] bg-[#111311] p-5 transition-colors duration-300 hover:border-white/15 sm:p-6"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><span className="font-mono text-[10px] tracking-[0.15em] text-[#d5fc69]">{item.year}</span><span className="rounded-full border border-white/10 px-3 py-1 text-[9px] tracking-[0.14em] text-neutral-500">{item.type}</span></div><h3 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">{item.title}</h3><p className="mt-3 text-sm leading-7 text-neutral-500">{item.desc}</p></div>
+              <div className="rounded-2xl border border-white/[0.08] bg-[#111311] p-5 sm:p-6"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><span className="font-mono text-[10px] tracking-[0.15em] text-[#d5fc69]">{item.year}</span><span className="rounded-full border border-white/10 px-3 py-1 text-[9px] tracking-[0.14em] text-neutral-500">{item.type}</span></div><h3 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">{item.title}</h3><p className="mt-3 text-sm leading-7 text-neutral-500">{item.desc}</p></div>
             </motion.article>)}
           </div>
         </div>
@@ -482,25 +930,12 @@ export default function Home() {
 
       <SectionWrapper id="contact" className="pb-16 pt-12 md:pb-20 md:pt-16">
         <div className="relative overflow-hidden rounded-[30px] border border-[#d5fc69]/20 bg-[#151a11] p-7 sm:rounded-[38px] sm:p-12 md:p-16">
-          <div aria-hidden="true" className="absolute -right-20 -top-28 h-80 w-80 rounded-full border border-[#d5fc69]/15" /><div aria-hidden="true" className="absolute -right-6 -top-14 h-52 w-52 rounded-full border border-[#d5fc69]/10" /><div aria-hidden="true" className="absolute bottom-[-30%] left-[25%] h-64 w-64 rounded-full bg-[#d5fc69]/[0.07] blur-[90px]" />
           <div className="relative z-10 grid gap-10 lg:grid-cols-[1fr_auto] lg:items-end">
             <div><SectionLabel number="05">The next chapter</SectionLabel><h2 className="max-w-2xl text-4xl font-semibold leading-[1.02] tracking-[-0.06em] text-white sm:text-6xl">Have an idea?<br /><span className="text-[#d5fc69]">Let’s make it real.</span></h2><p className="mt-6 max-w-xl text-sm leading-7 text-neutral-400 sm:text-base">I’m exploring new opportunities and always open to thoughtful conversations, collaborations, and interesting projects.</p></div>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap lg:w-[185px] lg:flex-col">
-<motion.a 
-                href="https://mail.google.com/mail/?view=cm&fs=1&to=joshbuiza2@gmail.com" 
-                target="_blank" 
-                rel="noreferrer" 
-                whileHover={{ y: -3 }} 
-                whileTap={{ scale: 0.98 }} 
-                className="inline-flex items-center justify-between gap-5 rounded-full bg-[#d5fc69] px-5 py-3.5 text-sm font-bold text-[#11130c] transition-shadow hover:shadow-[0_8px_32px_rgba(213,252,105,0.18)]"
-              >
-                <span className="flex items-center gap-3">
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2" stroke="currentColor" strokeWidth="1.6" /><path d="m3.5 6 8.5 6 8.5-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  Email me
-                </span>
-                <ArrowUpRight />
-              </motion.a>              <motion.a href="https://github.com/josh12343467" target="_blank" rel="noreferrer" whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }} className="inline-flex items-center justify-between gap-5 rounded-full border border-white/15 bg-black/10 px-5 py-3.5 text-sm font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.04]"><span className="flex items-center gap-3"><svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true"><path d="M9 19c-4.2 1.4-4.2-2.3-5.9-2.8M15 22v-3.5a3 3 0 0 0-.8-2.3c2.7-.3 5.5-1.3 5.5-6A4.7 4.7 0 0 0 18.4 7c.1-.9.1-1.8-.2-2.7 0 0-1-.3-3.2 1.2a11 11 0 0 0-5.8 0C7 4 6 4.3 6 4.3 5.7 5.2 5.7 6.1 5.8 7a4.7 4.7 0 0 0-1.3 3.3c0 4.7 2.8 5.7 5.5 6A3 3 0 0 0 9.2 19V22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>GitHub</span><ArrowUpRight /></motion.a>
-              <motion.a href="https://www.linkedin.com/in/joshua-buiza-b20563364/" target="_blank" rel="noreferrer" whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }} className="inline-flex items-center justify-between gap-5 rounded-full border border-white/15 bg-black/10 px-5 py-3.5 text-sm font-semibold text-white transition-colors hover:border-white/30 hover:bg-white/[0.04]"><span className="flex items-center gap-3"><svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" aria-hidden="true"><path d="M5 9v10M5 5.1v.1M10 19v-5.5a3 3 0 0 1 6 0V19M10 10v9M2.5 2.5h19v19h-19z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>LinkedIn</span><ArrowUpRight /></motion.a>
+              <motion.a href="https://mail.google.com/mail/?view=cm&fs=1&to=joshbuiza2@gmail.com" target="_blank" rel="noreferrer" whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }} className="inline-flex items-center justify-between gap-5 rounded-full bg-[#d5fc69] px-5 py-3.5 text-sm font-bold text-[#11130c]"><span className="flex items-center gap-3">Email me</span><ArrowUpRight /></motion.a>
+              <motion.a href="https://github.com/josh12343467" target="_blank" rel="noreferrer" whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }} className="inline-flex items-center justify-between gap-5 rounded-full border border-white/15 bg-black/10 px-5 py-3.5 text-sm font-semibold text-white"><span>GitHub</span><ArrowUpRight /></motion.a>
+              <motion.a href="https://www.linkedin.com/in/joshua-buiza-b20563364/" target="_blank" rel="noreferrer" whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }} className="inline-flex items-center justify-between gap-5 rounded-full border border-white/15 bg-black/10 px-5 py-3.5 text-sm font-semibold text-white"><span>LinkedIn</span><ArrowUpRight /></motion.a>
             </div>
           </div>
         </div>
