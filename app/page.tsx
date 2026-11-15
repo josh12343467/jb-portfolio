@@ -150,6 +150,7 @@ type Project = {
   visual: string;
   video?: string;
   images?: string[];
+  imageLabels?: string[];
   thumbnail?: string;
   liveUrl?: string;
   repositoryUrl?: string;
@@ -173,18 +174,41 @@ const projects: Project[] = [
   },
   {
     number: "02",
-    title: "Mobile Money Tracker",
-    category: "MOBILE · PRODUCTIVITY",
-    desc: "A personal finance app with local notifications that helps make everyday expenses easier to monitor.",
-    fullDesc: "Designed to simplify financial tracking, this application uses a local SQLite database to store daily expenses. It features a clean UI and automated local notifications to remind users to log their budget, built with cross-platform mobile development concepts.",
-    problem: "Everyday spending can be difficult to track consistently without a simple way to record expenses and remember to update them.",
-    approach: "A personal finance app centered on daily expense logging, local data storage, and reminders.",
-    contributions: ["Mobile app experience for expense tracking", "Local data persistence with SQLite", "Reminder flow using local notifications"],
-    features: ["Daily expense logging", "SQLite-based local storage", "Local notifications to encourage regular updates"],
-    outcome: "Designed to make everyday expenses easier to monitor without relying on a remote database for the local expense records.",
-    tags: ["Mobile App", "React Native", "Flutter"],
+    title: "ClassRoom Studio",
+    category: "WEB APP · EDUCATION",
+    desc: "An offline-first seating chart, attendance tracker, group maker, and gradebook for teachers, with cloud sync.",
+    fullDesc: "ClassRoom Studio lets teachers lay out their actual classroom, seat students by dragging, take attendance by tapping chairs, generate groups based on where students sit, and enter grades directly on the seating chart. Everything is saved on the device first and synced to the cloud in the background, so it keeps working without an internet connection.",
+    problem: "Teachers juggle seating charts, attendance sheets, grouping, and gradebooks across separate tools that don't reflect how the classroom is actually arranged.",
+    approach: "Make the seating chart the center of the app, so attendance, groups, and grades all happen on the same visual layout of the room, offline-first with Supabase cloud sync.",
+    contributions: [
+      "Drag-and-drop room editor with presets, snapping, undo/redo, and a locked Use Class mode",
+      "Seat-proximity grouping using size-capped k-means on chair positions, plus lock-together / keep-apart rules",
+      "Weighted gradebook with multiple grading scales (DepEd K–12, college 1.00–5.00, GPA, and more) and a seating-chart heat map",
+      "Offline-first sync with Supabase Auth and Postgres Row Level Security, with conflict handling that never silently discards data",
+    ],
+    features: [
+      "Drag-and-drop seating chart",
+      "Tap-to-mark attendance with CSV export",
+      "Random, proximity, and even-split groups",
+      "Gradebook with heat map",
+      "Random picker and countdown timer",
+      "Google sign-in and guest mode",
+      "Dark mode and JSON backup",
+    ],
+    outcome: "A working app teachers can try instantly in guest mode with sample data, backed by 52 passing Vitest tests.",
+    tags: ["Next.js", "React", "TypeScript", "Supabase", "Tailwind CSS", "Zustand"],
     accent: "violet",
     visual: "orbit",
+    images: [
+      "/classroom-studio/layout.png",
+      "/classroom-studio/attendance.png",
+      "/classroom-studio/groups.png",
+      "/classroom-studio/grades.png",
+    ],
+    imageLabels: ["Room layout", "Attendance", "Groups", "Grades"],
+    thumbnail: "/classroom-studio/layout.png",
+    liveUrl: "https://classroom-studio-jade.vercel.app",
+    repositoryUrl: "https://github.com/josh12343467/classroom-studio",
   },
   {
     number: "03",
@@ -324,7 +348,7 @@ function ProjectModal({ project, onClose }: { project: Project, onClose: () => v
     ...(project.images ?? []).map((src, index) => ({
       type: "image" as const,
       src,
-      label: (project.images?.length ?? 0) > 1 ? `Photo ${String(index + 1).padStart(2, "0")}` : "App screen",
+      label: project.imageLabels?.[index] ?? ((project.images?.length ?? 0) > 1 ? `Photo ${String(index + 1).padStart(2, "0")}` : "App screen"),
     })),
   ];
   const activeMedia = mediaItems[activeMediaIndex];
