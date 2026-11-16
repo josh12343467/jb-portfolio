@@ -1,72 +1,40 @@
 @import "tailwindcss";
 
 @theme {
-  --color-paper: #f3efe6;
-  --color-paper-2: #e9e3d5;
-  --color-ink: #1b1a17;
-  --color-ink-2: #55524a;
-  --color-ink-3: #8b8678;
-  --color-line: #d8d0bf;
-  --color-accent: #e0552b;
-  --color-accent-ink: #b5401b;
+  --color-bg: #121211;
+  --color-surface: #191917;
+  --color-surface-2: #21201e;
+  --color-line: #2a2926;
+  --color-line-strong: #3a3935;
+  --color-fg: #e6e3dc;
+  --color-fg-2: #a6a299;
+  --color-fg-3: #75716a;
+  --color-accent: #cdb68c;
 
-  --font-sans: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-instrument-serif), ui-serif, Georgia, serif;
 }
 
 html {
-  background: var(--color-paper);
+  background: var(--color-bg);
+  color-scheme: dark;
   scroll-padding-top: 5rem;
 }
 
 body {
-  background: var(--color-paper);
-  color: var(--color-ink);
+  background: var(--color-bg);
+  color: var(--color-fg);
 }
 
 ::selection {
-  background: var(--color-accent);
-  color: var(--color-paper);
-}
-
-/* Faint graph-paper texture used behind the hero and project art */
-.graph-paper {
-  background-image:
-    linear-gradient(color-mix(in oklab, var(--color-ink) 6%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in oklab, var(--color-ink) 6%, transparent) 1px, transparent 1px);
-  background-size: 24px 24px;
-}
-
-/* Underline that draws in from the left on hover */
-.draw-underline {
-  background-image: linear-gradient(currentColor, currentColor);
-  background-size: 0% 1.5px;
-  background-position: 0 100%;
-  background-repeat: no-repeat;
-  transition: background-size 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.draw-underline:hover,
-.draw-underline:focus-visible {
-  background-size: 100% 1.5px;
-}
-
-/* Infinite ticker */
-@keyframes ticker {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); }
-}
-.ticker-track {
-  animation: ticker 38s linear infinite;
-}
-.ticker:hover .ticker-track {
-  animation-play-state: paused;
+  background: color-mix(in oklab, var(--color-accent) 35%, transparent);
+  color: var(--color-fg);
 }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .ticker-track { animation: none; }
 }
 
 .thin-scrollbar::-webkit-scrollbar { width: 8px; }
 .thin-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.thin-scrollbar::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 8px; }
+.thin-scrollbar::-webkit-scrollbar-thumb { background: var(--color-line-strong); border-radius: 8px; }

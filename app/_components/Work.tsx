@@ -1,62 +1,62 @@
 "use client";
 
-import { AnimatePresence, motion, useScroll, useTransform } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { projects, type Project } from "../data";
-import { ArrowRight, Reveal, SectionHead, ease } from "./motion";
+import { ArrowUpRight, SectionHead, ease } from "./motion";
 import ProjectArt from "./ProjectArt";
 import ProjectSheet from "./ProjectSheet";
 
-function ProjectRow({ project, index, onOpen }: { project: Project; index: number; onOpen: () => void }) {
-  const ref = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const imageY = useTransform(scrollYProgress, [0, 1], ["-7%", "7%"]);
-  const flipped = index % 2 === 1;
-
+function ProjectCard({ project, index, featured, onOpen }: { project: Project; index: number; featured: boolean; onOpen: () => void }) {
   return (
-    <article ref={ref} className="grid items-center gap-8 md:grid-cols-12 md:gap-12">
-      <motion.button
-        type="button"
-        onClick={onOpen}
-        aria-label={`Open the ${project.title} case study`}
-        initial={{ clipPath: "inset(12% 12% 12% 12%)", opacity: 0 }}
-        whileInView={{ clipPath: "inset(0% 0% 0% 0%)", opacity: 1 }}
-        viewport={{ once: true, amount: 0.3 }}
-        transition={{ duration: 1.1, ease }}
-        className={`group relative block aspect-[16/11] w-full cursor-pointer overflow-hidden rounded-md border border-ink/15 bg-paper-2 md:col-span-7 ${flipped ? "md:order-2" : ""}`}
-      >
-        <motion.div style={{ y: imageY }} className="absolute -inset-y-[8%] inset-x-0">
-          <div className="h-full w-full transition-transform duration-700 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.04]">
-            {project.thumbnail ? (
-              <Image src={project.thumbnail} alt="" fill sizes="(min-width: 768px) 60vw, 100vw" className="object-cover object-top" />
-            ) : (
-              <ProjectArt />
-            )}
-          </div>
-        </motion.div>
-        <span className="absolute bottom-4 right-4 inline-flex translate-y-2 items-center gap-2 rounded-full bg-ink px-4 py-2 text-xs font-semibold text-paper opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-          View case study <ArrowRight className="size-3.5" />
-        </span>
-      </motion.button>
+    <motion.button
+      type="button"
+      onClick={onOpen}
+      aria-label={`Open the ${project.title} case study`}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.7, delay: index * 0.08, ease }}
+      whileHover={{ y: -4 }}
+      className={`group flex w-full flex-col overflow-hidden rounded-2xl border border-line bg-surface text-left transition-colors duration-300 hover:border-line-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+        featured ? "sm:col-span-2 md:flex-row" : ""
+      }`}
+    >
+      <div className={`relative aspect-[16/10] w-full shrink-0 overflow-hidden bg-surface-2 ${featured ? "md:aspect-auto md:min-h-[20rem] md:w-[58%]" : ""}`}>
+        <div className="absolute inset-0 transition-transform duration-700 ease-[cubic-bezier(.22,1,.36,1)] group-hover:scale-[1.03]">
+          {project.thumbnail ? (
+            <Image
+              src={project.thumbnail}
+              alt=""
+              fill
+              sizes={featured ? "(min-width: 768px) 520px, 100vw" : "(min-width: 640px) 440px, 100vw"}
+              className="object-cover object-top opacity-90 transition-opacity duration-300 group-hover:opacity-100"
+            />
+          ) : (
+            <ProjectArt />
+          )}
+        </div>
+      </div>
 
-      <Reveal delay={0.1} className={`md:col-span-5 ${flipped ? "md:order-1" : ""}`}>
-        <p className="font-mono text-xs text-ink-3">
-          {project.number} — {project.category} — {project.year}
+      <div className={`flex flex-1 flex-col p-6 ${featured ? "md:p-8" : ""}`}>
+        <p className="text-xs text-fg-3">
+          {project.category} · {project.year}
         </p>
-        <h3 className="mt-4 text-4xl font-bold leading-none tracking-[-0.03em] sm:text-5xl">{project.title}</h3>
-        <p className="mt-5 leading-relaxed text-ink-2">{project.desc}</p>
-        <p className="mt-5 font-mono text-xs leading-6 text-ink-3">{project.tags.join("  /  ")}</p>
-        <button
-          type="button"
-          onClick={onOpen}
-          className="group mt-8 inline-flex items-center gap-3 border-b-2 border-ink pb-1 text-sm font-semibold transition-colors hover:border-accent hover:text-accent-ink"
-        >
-          Read the case study
-          <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
-        </button>
-      </Reveal>
-    </article>
+        <h3 className="mt-2 flex items-center gap-2 text-xl font-medium text-fg">
+          {project.title}
+          <ArrowUpRight className="size-4 text-fg-3 opacity-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:opacity-100" />
+        </h3>
+        <p className="mt-3 text-[15px] leading-relaxed text-fg-2">{project.desc}</p>
+        <ul className="mt-auto flex flex-wrap gap-1.5 pt-6">
+          {project.tags.map((tag) => (
+            <li key={tag} className="rounded-full bg-surface-2 px-2.5 py-1 text-xs text-fg-2">
+              {tag}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </motion.button>
   );
 }
 
@@ -65,16 +65,12 @@ export default function Work() {
   const openProject = projects.find((p) => p.slug === openSlug) ?? null;
 
   return (
-    <section id="work" className="mx-auto max-w-6xl px-5 py-24 sm:px-8 md:py-36">
-      <SectionHead
-        label="Selected work"
-        title="Things I’ve built."
-        aside={<p className="text-sm leading-relaxed text-ink-2">Open any project for screenshots, demos, and how it came together.</p>}
-      />
+    <section id="work" className="mx-auto max-w-4xl px-5 py-16 sm:px-6 sm:py-20">
+      <SectionHead title="Projects" note="Open a project for screenshots and details" />
 
-      <div className="flex flex-col gap-24 md:gap-36">
+      <div className="grid gap-5 sm:grid-cols-2">
         {projects.map((project, i) => (
-          <ProjectRow key={project.slug} project={project} index={i} onOpen={() => setOpenSlug(project.slug)} />
+          <ProjectCard key={project.slug} project={project} index={i} featured={i === 0} onOpen={() => setOpenSlug(project.slug)} />
         ))}
       </div>
 

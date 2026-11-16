@@ -23,26 +23,26 @@ function MediaViewer({ project }: { project: Project }) {
 
   return (
     <div>
-      <div className="relative aspect-[16/10] overflow-hidden rounded-md border border-ink/15 bg-paper-2">
+      <div className="relative aspect-[16/10] overflow-hidden rounded-xl border border-line bg-surface-2">
         {current ? (
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={current.src}
-              initial={{ opacity: 0, scale: 0.985 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.01 }}
-              transition={{ duration: 0.3, ease }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
               className="absolute inset-0"
             >
               {current.type === "video" ? (
                 <video src={current.src} autoPlay loop muted controls playsInline className="h-full w-full object-contain" />
               ) : (
-                <Image src={current.src} alt={`${project.title}: ${current.label}`} fill sizes="(min-width: 1024px) 50rem, 100vw" className="object-contain p-2" />
+                <Image src={current.src} alt={`${project.title}: ${current.label}`} fill sizes="(min-width: 768px) 640px, 100vw" className="object-contain" />
               )}
             </motion.div>
           </AnimatePresence>
         ) : (
-          <ProjectArt label="Concept illustration — photos coming soon" />
+          <ProjectArt label="Photos coming soon" />
         )}
       </div>
 
@@ -55,11 +55,11 @@ function MediaViewer({ project }: { project: Project }) {
               role="tab"
               aria-selected={i === index}
               onClick={() => setIndex(i)}
-              className={`relative shrink-0 rounded-md border px-3 py-2 text-left text-xs transition-colors ${
-                i === index ? "border-ink bg-ink text-paper" : "border-ink/15 text-ink-2 hover:border-ink/40 hover:text-ink"
+              className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs transition-colors ${
+                i === index ? "bg-fg text-bg" : "bg-surface-2 text-fg-2 hover:text-fg"
               }`}
             >
-              <span className="font-mono opacity-60">{String(i + 1).padStart(2, "0")}</span> {m.label}
+              {m.label}
             </button>
           ))}
         </div>
@@ -70,8 +70,8 @@ function MediaViewer({ project }: { project: Project }) {
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="border-t border-line py-8">
-      <h4 className="mb-4 font-mono text-xs text-ink-3">{title}</h4>
+    <section className="mt-10">
+      <h4 className="mb-3 text-sm font-medium text-fg">{title}</h4>
       {children}
     </section>
   );
@@ -111,11 +111,11 @@ export default function ProjectSheet({
   return (
     <div className="fixed inset-0 z-[80]" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
       <motion.div
-        className="absolute inset-0 bg-ink/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.35 }}
+        transition={{ duration: 0.3 }}
         onClick={onClose}
       />
 
@@ -123,22 +123,22 @@ export default function ProjectSheet({
         initial={{ x: "100%" }}
         animate={{ x: 0 }}
         exit={{ x: "100%" }}
-        transition={{ duration: 0.6, ease }}
-        className="absolute inset-y-0 right-0 flex w-full max-w-3xl flex-col bg-paper shadow-[-24px_0_60px_-30px_rgba(27,26,23,0.5)]"
+        transition={{ duration: 0.5, ease }}
+        className="absolute inset-y-0 right-0 flex w-full max-w-2xl flex-col border-l border-line bg-bg"
       >
         <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-5 sm:px-8">
-          <p className="font-mono text-xs text-ink-3">
-            Case study {project.number} / {String(projects.length).padStart(2, "0")}
+          <p className="text-sm text-fg-3">
+            {i + 1} of {projects.length}
           </p>
           <button
             ref={closeRef}
             type="button"
             onClick={onClose}
-            className="group inline-flex items-center gap-2 rounded-full border border-line px-4 py-2 text-sm font-medium transition-colors hover:border-ink"
+            aria-label="Close project"
+            className="flex size-9 items-center justify-center rounded-full text-fg-2 transition-colors hover:bg-surface-2 hover:text-fg"
           >
-            Close
-            <svg viewBox="0 0 24 24" className="size-4 transition-transform duration-300 group-hover:rotate-90" fill="none" aria-hidden="true">
-              <path d="M18 6 6 18M6 6l12 12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            <svg viewBox="0 0 24 24" className="size-5" fill="none" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
             </svg>
           </button>
         </div>
@@ -147,102 +147,93 @@ export default function ProjectSheet({
           <AnimatePresence mode="wait" initial={false}>
             <motion.article
               key={project.slug}
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
-              transition={{ duration: 0.45, ease }}
-              className="px-5 pb-16 pt-10 sm:px-8"
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35, ease }}
+              className="px-5 pb-14 pt-8 sm:px-8"
             >
-              <p className="font-mono text-xs text-accent-ink">{project.category}</p>
-              <h3 id="sheet-title" className="mt-3 text-[clamp(2.4rem,7vw,4rem)] font-extrabold leading-[0.95] tracking-[-0.04em]">
+              <p className="text-sm text-fg-3">
+                {project.category} · {project.year}
+              </p>
+              <h3 id="sheet-title" className="mt-2 text-3xl font-medium tracking-[-0.02em] text-fg sm:text-4xl">
                 {project.title}
               </h3>
-              <p className="mt-5 max-w-2xl text-lg leading-snug text-ink-2">{project.desc}</p>
+              <p className="mt-4 text-[17px] leading-relaxed text-fg-2">{project.desc}</p>
 
-              <dl className="mt-8 grid grid-cols-2 gap-x-6 gap-y-5 border-t border-line pt-6 text-sm sm:grid-cols-4">
-                <div>
-                  <dt className="font-mono text-xs text-ink-3">Year</dt>
-                  <dd className="mt-1 font-semibold">{project.year}</dd>
+              {(project.liveUrl || project.repositoryUrl) && (
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {project.liveUrl && (
+                    <a href={project.liveUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full bg-fg px-4 py-2 text-sm font-medium text-bg transition-opacity hover:opacity-85">
+                      Live demo <ArrowUpRight className="size-3.5" />
+                    </a>
+                  )}
+                  {project.repositoryUrl && (
+                    <a href={project.repositoryUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 rounded-full border border-line px-4 py-2 text-sm text-fg-2 transition-colors hover:border-line-strong hover:text-fg">
+                      Source code <ArrowUpRight className="size-3.5" />
+                    </a>
+                  )}
                 </div>
-                <div className="sm:col-span-2">
-                  <dt className="font-mono text-xs text-ink-3">Built with</dt>
-                  <dd className="mt-1 font-semibold">{project.tags.join(", ")}</dd>
-                </div>
-                <div>
-                  <dt className="font-mono text-xs text-ink-3">Links</dt>
-                  <dd className="mt-1 flex flex-col gap-1 font-semibold">
-                    {project.liveUrl && (
-                      <a href={project.liveUrl} target="_blank" rel="noreferrer" className="draw-underline inline-flex w-fit items-center gap-1">
-                        Live demo <ArrowUpRight className="size-3.5" />
-                      </a>
-                    )}
-                    {project.repositoryUrl && (
-                      <a href={project.repositoryUrl} target="_blank" rel="noreferrer" className="draw-underline inline-flex w-fit items-center gap-1">
-                        Source code <ArrowUpRight className="size-3.5" />
-                      </a>
-                    )}
-                    {!project.liveUrl && !project.repositoryUrl && <span className="font-normal text-ink-3">Not public yet</span>}
-                  </dd>
-                </div>
-              </dl>
+              )}
 
               <div className="mt-8">
                 <MediaViewer project={project} />
               </div>
 
-              <div className="mt-10">
-                <Block title="Overview">
-                  <p className="leading-relaxed text-ink-2">{project.fullDesc}</p>
-                </Block>
+              <Block title="Overview">
+                <p className="leading-relaxed text-fg-2">{project.fullDesc}</p>
+              </Block>
 
-                <section className="grid gap-8 border-t border-line py-8 sm:grid-cols-2">
-                  <div>
-                    <h4 className="mb-3 font-mono text-xs text-ink-3">The problem</h4>
-                    <p className="leading-relaxed">{project.problem}</p>
-                  </div>
-                  <div>
-                    <h4 className="mb-3 font-mono text-xs text-ink-3">The approach</h4>
-                    <p className="leading-relaxed">{project.approach}</p>
-                  </div>
-                </section>
-
-                <Block title="What I did">
-                  <ol className="space-y-3">
-                    {project.contributions.map((c, n) => (
-                      <li key={c} className="flex gap-4 leading-relaxed">
-                        <span className="mt-0.5 font-mono text-xs text-accent-ink">{String(n + 1).padStart(2, "0")}</span>
-                        <span>{c}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </Block>
-
-                <Block title="Features">
-                  <ul className="grid gap-x-8 gap-y-2 sm:grid-cols-2">
-                    {project.features.map((f) => (
-                      <li key={f} className="flex gap-3 text-ink-2">
-                        <span aria-hidden="true" className="text-accent">—</span>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                </Block>
-
-                <Block title="Outcome">
-                  <p className="border-l-[3px] border-accent pl-5 text-xl leading-snug">{project.outcome}</p>
-                </Block>
+              <div className="mt-10 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-xl bg-surface p-5">
+                  <h4 className="text-sm font-medium text-fg">The problem</h4>
+                  <p className="mt-2 text-[15px] leading-relaxed text-fg-2">{project.problem}</p>
+                </div>
+                <div className="rounded-xl bg-surface p-5">
+                  <h4 className="text-sm font-medium text-fg">The approach</h4>
+                  <p className="mt-2 text-[15px] leading-relaxed text-fg-2">{project.approach}</p>
+                </div>
               </div>
+
+              <Block title="What I did">
+                <ul className="space-y-2.5">
+                  {project.contributions.map((c) => (
+                    <li key={c} className="flex gap-3 leading-relaxed text-fg-2">
+                      <span aria-hidden="true" className="mt-[0.7em] size-1 shrink-0 rounded-full bg-accent" />
+                      {c}
+                    </li>
+                  ))}
+                </ul>
+              </Block>
+
+              <Block title="Features">
+                <ul className="flex flex-wrap gap-2">
+                  {project.features.map((f) => (
+                    <li key={f} className="rounded-full bg-surface-2 px-3 py-1.5 text-sm text-fg-2">
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </Block>
+
+              <Block title="Outcome">
+                <p className="leading-relaxed text-fg-2">{project.outcome}</p>
+              </Block>
+
+              <Block title="Built with">
+                <p className="text-fg-2">{project.tags.join(", ")}</p>
+              </Block>
 
               <button
                 type="button"
                 onClick={goNext}
-                className="group mt-6 flex w-full items-center justify-between gap-6 rounded-md bg-ink px-6 py-6 text-left text-paper transition-colors hover:bg-accent-ink"
+                className="group mt-12 flex w-full items-center justify-between gap-6 rounded-xl border border-line px-5 py-4 text-left transition-colors hover:border-line-strong hover:bg-surface"
               >
                 <span>
-                  <span className="block font-mono text-xs text-paper/60">Next project</span>
-                  <span className="mt-1 block text-2xl font-bold tracking-tight">{next.title}</span>
+                  <span className="block text-xs text-fg-3">Next project</span>
+                  <span className="mt-0.5 block text-base font-medium text-fg">{next.title}</span>
                 </span>
-                <ArrowRight className="size-6 transition-transform duration-300 group-hover:translate-x-1.5" />
+                <ArrowRight className="size-5 text-fg-2 transition-transform duration-300 group-hover:translate-x-1" />
               </button>
             </motion.article>
           </AnimatePresence>

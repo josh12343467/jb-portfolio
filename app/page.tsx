@@ -5,7 +5,6 @@ import Hero from "./_components/Hero";
 import Milestones from "./_components/Milestones";
 import MotionProvider from "./_components/MotionProvider";
 import Stack from "./_components/Stack";
-import Ticker from "./_components/Ticker";
 import Work from "./_components/Work";
 
 export default function Home() {
@@ -14,10 +13,9 @@ export default function Home() {
       <Header />
       <main>
         <Hero />
-        <Ticker />
+        <Work />
         <About />
         <Stack />
-        <Work />
         <Milestones />
         <Contact />
       </main>

@@ -1,17 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
+import { Instrument_Sans, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
-const bricolage = Bricolage_Grotesque({
+const instrumentSans = Instrument_Sans({
   subsets: ["latin"],
-  variable: "--font-bricolage",
+  variable: "--font-instrument-sans",
   display: "swap",
 });
 
-const jetbrains = JetBrains_Mono({
+const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-jetbrains",
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-instrument-serif",
   display: "swap",
 });
 
@@ -21,12 +22,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#f3efe6",
+  themeColor: "#121211",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${bricolage.variable} ${jetbrains.variable} scroll-smooth`}>
+    <html lang="en" className={`${instrumentSans.variable} ${instrumentSerif.variable} scroll-smooth`}>
       <body className="font-sans antialiased">{children}</body>
     </html>
   );

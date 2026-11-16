@@ -79,22 +79,6 @@ export type Project = {
 export const projects: Project[] = [
   {
     number: "01",
-    slug: "glass-board",
-    title: "Interactive Glass Board",
-    year: "2026",
-    category: "Hardware · Interaction",
-    desc: "A custom hardware and software experience for interactive displays, built to move beyond traditional mesh setups.",
-    fullDesc:
-      "This project explores a new way of interacting with displays. By bypassing traditional mesh setups, the Interactive Glass Board offers a more direct, responsive, and tactile interaction model. I handled the C++ firmware development and the UI/UX design for the interface.",
-    problem: "Traditional mesh-based display setups can make direct, tactile interaction harder to achieve.",
-    approach: "Explore a more direct and responsive interaction model by bringing custom hardware and interface design together.",
-    contributions: ["C++ firmware development", "UI/UX design for the interface"],
-    features: ["Interactive display experience", "Hardware and software integration", "Responsive, tactile interaction model"],
-    outcome: "Designed to move beyond traditional mesh setups and offer a more direct, responsive way to interact with a display.",
-    tags: ["Hardware", "C++", "UI/UX"],
-  },
-  {
-    number: "02",
     slug: "classroom-studio",
     title: "ClassRoom Studio",
     year: "2026",
@@ -139,7 +123,7 @@ export const projects: Project[] = [
     repositoryUrl: "https://github.com/josh12343467/classroom-studio",
   },
   {
-    number: "03",
+    number: "02",
     slug: "smart-home",
     title: "Smart Home Prototype",
     year: "2026",
@@ -157,6 +141,22 @@ export const projects: Project[] = [
     images: ["/cirvia_app.jpg"],
     imageLabels: ["Companion app"],
     thumbnail: "/cirvia_poster.png",
+  },
+  {
+    number: "03",
+    slug: "glass-board",
+    title: "Interactive Glass Board",
+    year: "2026",
+    category: "Hardware · Interaction",
+    desc: "A custom hardware and software experience for interactive displays, built to move beyond traditional mesh setups.",
+    fullDesc:
+      "This project explores a new way of interacting with displays. By bypassing traditional mesh setups, the Interactive Glass Board offers a more direct, responsive, and tactile interaction model. I handled the C++ firmware development and the UI/UX design for the interface.",
+    problem: "Traditional mesh-based display setups can make direct, tactile interaction harder to achieve.",
+    approach: "Explore a more direct and responsive interaction model by bringing custom hardware and interface design together.",
+    contributions: ["C++ firmware development", "UI/UX design for the interface"],
+    features: ["Interactive display experience", "Hardware and software integration", "Responsive, tactile interaction model"],
+    outcome: "Designed to move beyond traditional mesh setups and offer a more direct, responsive way to interact with a display.",
+    tags: ["Hardware", "C++", "UI/UX"],
   },
 ];
 
@@ -176,9 +176,9 @@ export const milestones = [
 ];
 
 export const navItems = [
+  { label: "Projects", id: "work" },
   { label: "About", id: "about" },
   { label: "Stack", id: "stack" },
-  { label: "Work", id: "work" },
   { label: "Milestones", id: "milestones" },
   { label: "Contact", id: "contact" },
 ];
