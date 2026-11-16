@@ -1,29 +1,33 @@
-import type { Metadata } from "next";
-import { Space_Grotesk } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-// Premium Font Initialization
-const spaceGrotesk = Space_Grotesk({ 
+const bricolage = Bricolage_Grotesque({
   subsets: ["latin"],
-  weight: ['300', '400', '500', '600', '700']
+  variable: "--font-bricolage",
+  display: "swap",
+});
+
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-jetbrains",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Joshua Buiza | IT & Developer",
-  description: "Portfolio of Joshua Buiza, specializing in mobile apps, hardware, and web development.",
+  title: "Joshua Buiza — IT student & builder",
+  description: "Portfolio of Joshua Buiza: mobile apps, web apps, firmware, and connected hardware prototypes.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export const viewport: Viewport = {
+  themeColor: "#f3efe6",
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="scroll-smooth">
-      {/* Ina-apply natin ang font sa buong website */}
-      <body className={`${spaceGrotesk.className} antialiased bg-[#0a0a0a]`}>
-        {children}
-      </body>
+    <html lang="en" className={`${bricolage.variable} ${jetbrains.variable} scroll-smooth`}>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   );
 }
