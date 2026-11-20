@@ -27,6 +27,7 @@ export const stack: StackRow[] = [
     area: "Backend & data",
     purpose: "App services and storage behind the features.",
     tools: [
+      { name: "Supabase", note: "Postgres, auth & realtime" },
       { name: "Firebase", note: "App platform" },
       { name: "SQLite", note: "Local database" },
     ],
@@ -79,6 +80,63 @@ export type Project = {
 export const projects: Project[] = [
   {
     number: "01",
+    slug: "irondesk",
+    title: "IronDesk",
+    year: "2026",
+    category: "Web app · Fitness business",
+    desc: "A gym management system with QR check-in, a mobile member portal, class booking, and a Supabase backend secured with Row Level Security.",
+    fullDesc:
+      "IronDesk runs a small gym from one app with three roles. The front desk checks members in by scanning their QR pass, registers and renews memberships, sells walk-in day passes, and books members into classes. Admins get revenue and attendance reports, plans and prices, staff accounts, and an audit log of every change. Members get a phone-friendly portal with a digital pass, class booking, weigh-in tracking, and their payment history. It is built for the Philippines, with peso pricing, GCash, Manila time for daily rules, and tools for the Data Privacy Act.",
+    problem:
+      "Small gyms track members in notebooks and spreadsheets, so expired members slip in, renewals are missed, classes get overbooked, and personal and health information is kept without real privacy safeguards.",
+    approach:
+      "Build one system for the front desk, admins, and members where the database itself enforces who can see and change what, and where privacy law requirements like consent, data access, and erasure are features instead of afterthoughts.",
+    contributions: [
+      "Staff console and mobile-first member portal in React and TypeScript, with QR check-in by webcam, phone camera, or USB scanner",
+      "Supabase backend: Postgres schema with Row Level Security on every table, and business rules (class capacity, membership expiry, renewals, erasure) enforced in database functions",
+      "70 automated security tests that run the real migration on in-process Postgres (PGlite) and check what every role can and cannot read or change",
+      "Passwordless email-code sign-in for members, authenticator-app MFA for admins, and an Edge Function that keeps the service-role key on the server",
+      "Data Privacy Act tools: recorded consents, health screening, guardian consent for minors, member data export, erasure that de-identifies records, and an append-only audit log",
+    ],
+    features: [
+      "QR check-in and printable member ID cards",
+      "Renewals and walk-in day passes",
+      "Weekly class schedule with booking limits",
+      "Cash, GCash, and card payments with CSV export",
+      "Revenue, renewal rate, and peak-hour reports",
+      "Member portal with a digital pass",
+      "Realtime sync across devices",
+      "Admin MFA and audit log",
+    ],
+    outcome:
+      "Deployed on Vercel with a live Supabase backend and tested end to end with admin, front-desk, and member accounts. The live site needs an account from the gym; the repository includes an offline demo mode with sample data.",
+    tags: ["React", "TypeScript", "Supabase", "PostgreSQL", "Tailwind CSS", "Vite"],
+    images: [
+      "/irondesk/dashboard.png",
+      "/irondesk/check-in.png",
+      "/irondesk/id-card.png",
+      "/irondesk/classes.png",
+      "/irondesk/reports.png",
+      "/irondesk/privacy.png",
+      "/irondesk/portal-home.png",
+      "/irondesk/portal-classes.png",
+    ],
+    imageLabels: [
+      "Dashboard",
+      "Front-desk check-in",
+      "Member ID card",
+      "Class schedule",
+      "Reports",
+      "Privacy & compliance",
+      "Member pass on a phone",
+      "Class booking on a phone",
+    ],
+    thumbnail: "/irondesk/dashboard.png",
+    liveUrl: "https://irondesk-nine.vercel.app",
+    repositoryUrl: "https://github.com/josh12343467/irondesk",
+  },
+  {
+    number: "02",
     slug: "classroom-studio",
     title: "ClassRoom Studio",
     year: "2026",
@@ -123,7 +181,7 @@ export const projects: Project[] = [
     repositoryUrl: "https://github.com/josh12343467/classroom-studio",
   },
   {
-    number: "02",
+    number: "03",
     slug: "smart-home",
     title: "Smart Home Prototype",
     year: "2026",
@@ -143,7 +201,7 @@ export const projects: Project[] = [
     thumbnail: "/cirvia_poster.png",
   },
   {
-    number: "03",
+    number: "04",
     slug: "glass-board",
     title: "Interactive Glass Board",
     year: "2026",

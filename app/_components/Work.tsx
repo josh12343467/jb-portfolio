@@ -69,9 +69,20 @@ export default function Work() {
       <SectionHead title="Projects" note="Open a project for screenshots and details" />
 
       <div className="grid gap-5 sm:grid-cols-2">
-        {projects.map((project, i) => (
-          <ProjectCard key={project.slug} project={project} index={i} featured={i === 0} onOpen={() => setOpenSlug(project.slug)} />
-        ))}
+        {projects.map((project, i) => {
+          // The first project is featured. If the rest don't fill the two-column grid evenly,
+          // the last one goes full width too, so no card is left alone in a half-empty row.
+          const lastIsAlone = i === projects.length - 1 && (projects.length - 1) % 2 === 1;
+          return (
+            <ProjectCard
+              key={project.slug}
+              project={project}
+              index={i}
+              featured={i === 0 || lastIsAlone}
+              onOpen={() => setOpenSlug(project.slug)}
+            />
+          );
+        })}
       </div>
 
       <AnimatePresence>
